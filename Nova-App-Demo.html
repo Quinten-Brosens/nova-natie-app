@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#284532">
+<title>Nova Natie App — Demo</title>
+<style>
+  :root{
+    --navy:#284532;       /* Nova hoofdkleur donkergroen */
+    --navy2:#33543f;
+    --accent:#C9833A;     /* Nova oranje */
+    --accent2:#b06f2c;
+    --green-mid:#88A595;  /* Nova tussengroen */
+    --green-lt:#E1EAE4;   /* Nova lichtgroen */
+    --ok:#3f7a55;
+    --nok:#b23b3b;
+    --na:#8a938c;
+    --bg:#E1EAE4;
+    --card:#ffffff;
+    --line:#d3ddd6;
+    --ink:#22302a;
+    --muted:#6a766f;
+    --shadow:0 6px 22px rgba(40,69,50,.14);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);}
+  body{background:linear-gradient(135deg,#284532,#33543f);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;}
+
+  /* Phone frame on desktop, full screen on phone */
+  #phone{
+    width:100%;max-width:430px;height:100vh;max-height:100vh;
+    background:var(--bg);position:relative;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  @media(min-width:560px){
+    body{padding:24px;}
+    #phone{height:900px;max-height:92vh;border-radius:40px;box-shadow:0 30px 80px rgba(0,0,0,.45);border:10px solid #0a1622;}
+  }
+
+  /* Screens */
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;animation:slide .28s ease;overflow:hidden;}
+  .screen.active{display:flex;}
+  @keyframes slide{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes pop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 96px;}
+
+  /* Top bar */
+  .topbar{background:var(--navy);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:5;}
+  .topbar .back{font-size:22px;cursor:pointer;width:30px;}
+  .topbar h1{font-size:17px;margin:0;font-weight:600;flex:1;}
+  .topbar .sub{font-size:12px;opacity:.8;font-weight:400;}
+  .pill{background:rgba(255,255,255,.15);font-size:11px;padding:4px 9px;border-radius:20px;}
+
+  /* Login */
+  .login{flex:1;background:linear-gradient(160deg,#284532 0%,#33543f 55%,#41684f 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:32px 26px;}
+  .logo{font-size:32px;letter-spacing:1px;}
+  .logo b{font-weight:800;}
+  .logo i{font-style:normal;font-weight:300;}
+  .logo .dot{color:var(--accent);}
+  .login .tag{opacity:.85;margin-top:6px;font-size:14px;}
+  .field{margin-top:18px;}
+  .field label{font-size:12px;opacity:.85;display:block;margin-bottom:6px;}
+  .field input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:15px;}
+  .field input::placeholder{color:rgba(255,255,255,.5);}
+  .btn{display:block;width:100%;text-align:center;border:none;cursor:pointer;font-size:16px;font-weight:600;padding:15px;border-radius:14px;background:var(--accent);color:#fff;margin-top:22px;box-shadow:0 6px 18px rgba(201,131,58,.4);}
+  .btn:active{transform:translateY(1px);}
+  .btn.secondary{background:rgba(255,255,255,.12);color:#fff;box-shadow:none;}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--navy);box-shadow:none;}
+  .login .hint{margin-top:18px;font-size:12px;opacity:.7;text-align:center;}
+
+  /* Department grid */
+  .dept-head{padding:22px 18px 8px;}
+  .dept-head h2{margin:0;font-size:20px;}
+  .dept-head p{margin:4px 0 0;color:var(--muted);font-size:13px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px 24px;}
+  .dept{background:var(--card);border-radius:var(--radius);padding:16px 14px;box-shadow:var(--shadow);cursor:pointer;position:relative;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line);}
+  .dept:active{transform:scale(.98);}
+  .dept .ic{font-size:26px;}
+  .dept .nm{font-weight:600;font-size:14px;margin-top:8px;}
+  .dept.soon{opacity:.62;}
+  .dept .soon-tag{position:absolute;top:10px;right:10px;background:var(--green-lt);color:var(--muted);font-size:9px;padding:3px 7px;border-radius:20px;font-weight:600;}
+  .dept.hseq{border:1.5px solid var(--accent);}
+  .dept.hseq .soon-tag{background:var(--accent);color:#3a2400;}
+
+  /* Cards / tiles */
+  .hello{padding:18px 16px 4px;}
+  .hello h2{margin:0;font-size:21px;}
+  .hello p{margin:3px 0 0;color:var(--muted);font-size:13px;}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px 16px;}
+  .stat{background:var(--card);border-radius:14px;padding:12px 10px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--line);}
+  .stat .n{font-size:22px;font-weight:800;color:var(--navy);}
+  .stat .l{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.2;}
+  .stat.amber .n{color:var(--accent2);}
+  .stat.red .n{color:var(--nok);}
+
+  .section-t{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:14px 18px 6px;}
+
+  .tile{background:var(--card);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);margin:8px 16px;cursor:pointer;border:1px solid var(--line);}
+  .tile:active{transform:scale(.99);}
+  .tile .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--green-lt);flex-shrink:0;}
+  .tile.warn .ic{background:#f6e6d3;}
+  .tile .tx{flex:1;}
+  .tile .tx b{font-size:15px;display:block;}
+  .tile .tx span{font-size:12px;color:var(--muted);}
+  .tile .arrow{color:var(--muted);font-size:20px;}
+  .tile.disabled{opacity:.55;}
+  .tile .badge{background:var(--nok);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:2px 8px;}
+
+  /* Forms */
+  .form{padding:6px 16px 24px;}
+  .form label{display:block;font-size:13px;font-weight:600;margin:16px 0 7px;}
+  .form input,.form select,.form textarea{width:100%;padding:13px 12px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink);}
+  .form textarea{min-height:90px;resize:vertical;}
+  .photo-btn{margin-top:8px;border:2px dashed var(--green-mid);border-radius:14px;padding:22px;text-align:center;color:var(--muted);cursor:pointer;background:#f3f7f4;}
+  .photo-btn .big{font-size:30px;}
+  .photo-prev{margin-top:10px;border-radius:12px;width:100%;max-height:200px;object-fit:cover;display:none;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .chip{padding:9px 14px;border-radius:30px;border:1.5px solid var(--line);font-size:13px;cursor:pointer;background:#fff;}
+  .chip.sel{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .chip.urg.sel{background:var(--nok);border-color:var(--nok);}
+
+  /* Checklist */
+  .ck-meta{background:var(--card);margin:12px 16px;border-radius:14px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--line);font-size:13px;color:var(--muted);}
+  .ck-meta b{color:var(--ink);}
+  .progress{height:8px;background:var(--green-lt);border-radius:8px;margin-top:10px;overflow:hidden;}
+  .progress i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s;}
+  .ck-item{background:var(--card);margin:8px 16px;border-radius:14px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--line);}
+  .ck-item .q{font-size:14px;font-weight:600;margin-bottom:10px;}
+  .ck-opts{display:flex;gap:8px;}
+  .ck-opt{flex:1;text-align:center;padding:9px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);}
+  .ck-opt.ok.sel{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .ck-opt.nok.sel{background:var(--nok);color:#fff;border-color:var(--nok);}
+  .ck-opt.na.sel{background:var(--na);color:#fff;border-color:var(--na);}
+
+  /* Bottom nav */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:6;}
+  .nav a{flex:1;text-align:center;font-size:10px;color:var(--muted);text-decoration:none;cursor:pointer;}
+  .nav a .ic{font-size:20px;display:block;}
+  .nav a.on{color:var(--navy);font-weight:700;}
+
+  /* Floating button under forms */
+  .footer-cta{position:absolute;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 26%);}
+  .footer-cta .btn{margin-top:0;}
+
+  /* Success overlay */
+  .success{position:absolute;inset:0;background:rgba(11,42,74,.96);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;z-index:20;}
+  .success.show{display:flex;animation:pop .3s ease;}
+  .success .ring{width:96px;height:96px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center;font-size:52px;box-shadow:0 0 0 12px rgba(46,158,91,.2);}
+  .success h2{margin:24px 0 8px;font-size:23px;}
+  .success p{opacity:.85;font-size:14px;line-height:1.5;max-width:300px;}
+  .mailbox{background:rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-top:20px;width:100%;max-width:320px;text-align:left;font-size:12.5px;}
+  .mailbox .to{opacity:.7;}
+  .toast{position:absolute;bottom:84px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 18px;border-radius:30px;font-size:13px;box-shadow:var(--shadow);opacity:0;transition:.3s;z-index:30;white-space:nowrap;}
+  .toast.show{opacity:1;}
+  .demo-tag{position:fixed;top:10px;left:10px;background:var(--accent);color:#3a2400;font-size:10px;font-weight:700;padding:4px 9px;border-radius:6px;z-index:99;letter-spacing:.5px;}
+  @media(min-width:560px){.demo-tag{top:30px;left:30px;}}
+  .empty{color:var(--muted);text-align:center;padding:40px 20px;font-size:13.5px;}
+  .list-row{background:#fff;margin:8px 16px;border-radius:13px;padding:13px 14px;box-shadow:var(--shadow);border:1px solid var(--line);display:flex;gap:12px;align-items:center;}
+  .list-row .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .list-row .tx{flex:1;}
+  .list-row .tx b{font-size:14px;}
+  .list-row .tx span{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;}
+  .list-row .st{font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="demo-tag">DEMO</div>
+<div id="phone">
+
+  <!-- LOGIN -->
+  <section class="screen active" id="s-login">
+    <div class="login">
+      <div class="logo"><b>NOVA</b> <i>NATIE</i></div>
+      <div class="tag">Eén app voor heel Nova Natie</div>
+      <div class="field"><label>Gebruiker</label><input id="u-name" value="Quinten Brosens" placeholder="Naam"></div>
+      <div class="field"><label>Wachtwoord</label><input type="password" value="········" placeholder="Wachtwoord"></div>
+      <button class="btn" onclick="go('s-dept')">Aanmelden</button>
+      <button class="btn secondary" onclick="go('s-dept')">Aanmelden met Microsoft 365</button>
+      <div class="hint">Demo-versie · gegevens zijn fictief</div>
+    </div>
+  </section>
+
+  <!-- DEPARTMENT CHOICE -->
+  <section class="screen" id="s-dept">
+    <div class="topbar"><h1>Welkom, Quinten<br><span class="sub">Kies je afdeling</span></h1><span class="pill">Nova Natie</span></div>
+    <div class="scroll" style="padding-bottom:24px">
+      <div class="grid">
+        <div class="dept hseq" onclick="go('s-home')"><span class="soon-tag">ACTIEF</span><div class="ic">🦺</div><div class="nm">HSEQ / Preventie</div></div>
+        <div class="dept soon" onclick="soon('Operations')"><span class="soon-tag">BINNENKORT</span><div class="ic">🏗️</div><div class="nm">Operations</div></div>
+        <div class="dept soon" onclick="soon('Transport')"><span class="soon-tag">BINNENKORT</span><div class="ic">🚚</div><div class="nm">Transport</div></div>
+        <div class="dept soon" onclick="soon('Natie / CFS / Forest')"><span class="soon-tag">BINNENKORT</span><div class="ic">📦</div><div class="nm">Natie / CFS / Forest</div></div>
+        <div class="dept soon" onclick="soon('Markage')"><span class="soon-tag">BINNENKORT</span><div class="ic">🏷️</div><div class="nm">Markage</div></div>
+        <div class="dept soon" onclick="soon('Technische Dienst')"><span class="soon-tag">BINNENKORT</span><div class="ic">🔧</div><div class="nm">Technische Dienst</div></div>
+        <div class="dept soon" onclick="soon('Facility')"><span class="soon-tag">BINNENKORT</span><div class="ic">🧰</div><div class="nm">Facility</div></div>
+        <div class="dept soon" onclick="soon('HR')"><span class="soon-tag">BINNENKORT</span><div class="ic">👥</div><div class="nm">HR</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HSEQ HOME -->
+  <section class="screen" id="s-home">
+    <div class="topbar"><span class="back" onclick="go('s-dept')">‹</span><h1>HSEQ / Preventie</h1><span class="pill">QHSE</span></div>
+    <div class="scroll">
+      <div class="hello"><h2>Goeiedag, Quinten 👋</h2><p>Dinsdag 24 juni 2026 · Nova Natie</p></div>
+      <div class="stats">
+        <div class="stat"><div class="n" id="st-open">3</div><div class="l">Open meldingen</div></div>
+        <div class="stat amber"><div class="n">5</div><div class="l">Acties deze week</div></div>
+        <div class="stat red"><div class="n">12</div><div class="l">Dagen ongevalvrij</div></div>
+      </div>
+      <div class="section-t">Snel melden</div>
+      <div class="tile warn" onclick="openMelding()">
+        <div class="ic">⚠️</div><div class="tx"><b>Onveilige situatie melden</b><span>Foto · locatie · beschrijving</span></div><div class="arrow">›</div>
+      </div>
+      <div class="tile" onclick="go('s-insp-list')">
+        <div class="ic">✅</div><div class="tx"><b>Inspectie / checklist</b><span>Rondgang, PBM, ISPS, heftruck …</span></div><div class="arrow">›</div>
+      </div>
+      <div class="section-t">Overige (binnenkort)</div>
+      <div class="tile disabled" onclick="soon('Incident registreren')"><div class="ic">🚑</div><div class="tx"><b>Ongeval / incident</b><span>Registratie & onderzoek</span></div><div class="arrow">›</div></div>
+      <div class="tile disabled" onclick="soon('Toolbox & instructies')"><div class="ic">📋</div><div class="tx"><b>Toolbox & instructies</b><span>Vanuit SharePoint</span></div><div class="arrow">›</div></div>
+      <div class="tile disabled" onclick="soon('Risico-analyses & VIK')"><div class="ic">📑</div><div class="tx"><b>Risico-analyses & VIK</b><span>Per goederenstroom</span></div><div class="arrow">›</div></div>
+    </div>
+    <nav class="nav">
+      <a class="on"><span class="ic">🏠</span>Home</a>
+      <a onclick="openMelding()"><span class="ic">⚠️</span>Melden</a>
+      <a onclick="go('s-insp-list')"><span class="ic">✅</span>Inspecties</a>
+      <a onclick="go('s-mine')"><span class="ic">📂</span>Mijn meldingen</a>
+    </nav>
+  </section>
+
+  <!-- MELDING FORM -->
+  <section class="screen" id="s-melding">
+    <div class="topbar"><span class="back" onclick="go('s-home')">‹</span><h1>Onveilige situatie melden</h1></div>
+    <div class="scroll" style="padding-bottom:110px">
+      <div class="form">
+        <label>Foto</label>
+        <input type="file" accept="image/*" capture="environment" id="photo-in" style="display:none" onchange="prevPhoto(event)">
+        <div class="photo-btn" onclick="document.getElementById('photo-in').click()">
+          <div class="big">📷</div><div>Tik om foto te maken of te kiezen</div>
+        </div>
+        <img class="photo-prev" id="photo-prev">
+
+        <label>Locatie</label>
+        <select id="m-loc">
+          <option>Kaai / terminal</option>
+          <option>CFS magazijn</option>
+          <option>Forest magazijn</option>
+          <option>Stapelplaats buiten</option>
+          <option>Laad- en loszone</option>
+          <option>Kantoren</option>
+          <option>Werkplaats / TD</option>
+        </select>
+
+        <label>Categorie</label>
+        <div class="chips" id="m-cat">
+          <div class="chip" onclick="pick(this,'m-cat')">PBM</div>
+          <div class="chip" onclick="pick(this,'m-cat')">Heftruck / machine</div>
+          <div class="chip" onclick="pick(this,'m-cat')">Orde & netheid</div>
+          <div class="chip" onclick="pick(this,'m-cat')">Valgevaar</div>
+          <div class="chip" onclick="pick(this,'m-cat')">Gevaarlijke stoffen</div>
+          <div class="chip" onclick="pick(this,'m-cat')">Brandveiligheid</div>
+          <div class="chip" onclick="pick(this,'m-cat')">Andere</div>
+        </div>
+
+        <label>Urgentie</label>
+        <div class="chips" id="m-urg">
+          <div class="chip urg" onclick="pick(this,'m-urg')">Laag</div>
+          <div class="chip urg" onclick="pick(this,'m-urg')">Gemiddeld</div>
+          <div class="chip urg" onclick="pick(this,'m-urg')">Hoog</div>
+        </div>
+
+        <label>Beschrijving</label>
+        <textarea id="m-desc" placeholder="Beschrijf kort wat je vaststelt …"></textarea>
+
+        <label>Melder</label>
+        <input id="m-name" value="Quinten Brosens — QHSE">
+      </div>
+    </div>
+    <div class="footer-cta"><button class="btn" onclick="submitMelding()">Melding verzenden</button></div>
+  </section>
+
+  <!-- INSPECTION LIST -->
+  <section class="screen" id="s-insp-list">
+    <div class="topbar"><span class="back" onclick="go('s-home')">‹</span><h1>Inspecties & checklists</h1></div>
+    <div class="scroll">
+      <div class="section-t">Beschikbare checklists</div>
+      <div class="tile" onclick="openInsp('Dagelijkse rondgang kaai',8)"><div class="ic">🚧</div><div class="tx"><b>Dagelijkse rondgang kaai</b><span>8 controlepunten</span></div><div class="arrow">›</div></div>
+      <div class="tile" onclick="openInsp('PBM-controle ploeg',6)"><div class="ic">🦺</div><div class="tx"><b>PBM-controle ploeg</b><span>6 controlepunten</span></div><div class="arrow">›</div></div>
+      <div class="tile" onclick="openInsp('Heftruck pre-use check',7)"><div class="ic">🚜</div><div class="tx"><b>Heftruck pre-use check</b><span>7 controlepunten</span></div><div class="arrow">›</div></div>
+      <div class="tile" onclick="openInsp('ISPS toegangscontrole',5)"><div class="ic">🛡️</div><div class="tx"><b>ISPS toegangscontrole</b><span>5 controlepunten</span></div><div class="arrow">›</div></div>
+    </div>
+    <nav class="nav">
+      <a onclick="go('s-home')"><span class="ic">🏠</span>Home</a>
+      <a onclick="openMelding()"><span class="ic">⚠️</span>Melden</a>
+      <a class="on"><span class="ic">✅</span>Inspecties</a>
+      <a onclick="go('s-mine')"><span class="ic">📂</span>Mijn meldingen</a>
+    </nav>
+  </section>
+
+  <!-- INSPECTION DETAIL -->
+  <section class="screen" id="s-insp">
+    <div class="topbar"><span class="back" onclick="go('s-insp-list')">‹</span><h1 id="insp-title">Checklist</h1></div>
+    <div class="scroll" style="padding-bottom:110px">
+      <div class="ck-meta">
+        <div>Uitvoerder: <b>Quinten Brosens</b> · <b id="insp-date">24/06/2026</b></div>
+        <div class="progress"><i id="insp-bar"></i></div>
+        <div style="margin-top:6px"><span id="insp-prog">0</span> beantwoord · <span id="insp-nok" style="color:var(--nok);font-weight:700">0</span> tekortkomingen</div>
+      </div>
+      <div id="insp-items"></div>
+    </div>
+    <div class="footer-cta"><button class="btn" onclick="submitInsp()">Inspectie afronden</button></div>
+  </section>
+
+  <!-- MY REPORTS -->
+  <section class="screen" id="s-mine">
+    <div class="topbar"><span class="back" onclick="go('s-home')">‹</span><h1>Mijn meldingen</h1></div>
+    <div class="scroll">
+      <div class="section-t">Recent</div>
+      <div id="mine-list"></div>
+    </div>
+    <nav class="nav">
+      <a onclick="go('s-home')"><span class="ic">🏠</span>Home</a>
+      <a onclick="openMelding()"><span class="ic">⚠️</span>Melden</a>
+      <a onclick="go('s-insp-list')"><span class="ic">✅</span>Inspecties</a>
+      <a class="on"><span class="ic">📂</span>Mijn meldingen</a>
+    </nav>
+  </section>
+
+  <!-- SUCCESS OVERLAY -->
+  <div class="success" id="success">
+    <div class="ring">✓</div>
+    <h2 id="suc-title">Melding verzonden</h2>
+    <p id="suc-text"></p>
+    <div class="mailbox" id="suc-mail">
+      <div class="to">📧 Automatische e-mail verstuurd naar:</div>
+      <div id="suc-mailto"><b>quinten.brosens@novanatie.be</b> (QHSE)</div>
+    </div>
+    <button class="btn" style="max-width:320px;margin-top:26px" onclick="afterSuccess()">Klaar</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  var current='s-login';
+  var nextAfterSuccess='s-home';
+
+  function go(id){
+    document.getElementById(current).classList.remove('active');
+    document.getElementById(id).classList.add('active');
+    current=id;
+    document.querySelector('#'+id+' .scroll')?.scrollTo(0,0);
+  }
+  function soon(name){ toast(name+' — module volgt in volgende fase'); }
+  function toast(msg){
+    var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(window._tt); window._tt=setTimeout(function(){t.classList.remove('show');},2200);
+  }
+  function pick(el,group){
+    var multi = (group==='m-cat');
+    if(!multi){ document.querySelectorAll('#'+group+' .chip').forEach(c=>c.classList.remove('sel')); }
+    el.classList.toggle('sel');
+  }
+  function openMelding(){
+    // reset
+    document.getElementById('photo-prev').style.display='none';
+    document.getElementById('m-desc').value='';
+    document.querySelectorAll('#m-cat .chip,#m-urg .chip').forEach(c=>c.classList.remove('sel'));
+    go('s-melding');
+  }
+  function prevPhoto(e){
+    var f=e.target.files[0]; if(!f)return;
+    var img=document.getElementById('photo-prev');
+    img.src=URL.createObjectURL(f); img.style.display='block';
+  }
+  function submitMelding(){
+    var desc=document.getElementById('m-desc').value.trim();
+    var urg=document.querySelector('#m-urg .chip.sel');
+    if(!desc){ toast('Vul een korte beschrijving in'); return; }
+    if(!urg){ toast('Kies een urgentie'); return; }
+    var loc=document.getElementById('m-loc').value;
+    addMine('⚠️','Onveilige situatie — '+loc, urg.textContent, urg.textContent==='Hoog'?'var(--nok)':urg.textContent==='Gemiddeld'?'var(--accent2)':'var(--ok)');
+    bumpOpen();
+    document.getElementById('st-open');
+    showSuccess('Melding verzonden',
+      'Je melding is geregistreerd en doorgestuurd naar de QHSE-verantwoordelijke. Bij urgentie "Hoog" krijgt ook de leidinggevende meteen bericht.',
+      true,'<b>quinten.brosens@novanatie.be</b> (QHSE)'+(urg.textContent==='Hoog'?'<br><b>jonas.dieu@novanatie.be</b> (General Manager Operations)':''),
+      's-home');
+  }
+
+  /* ---- Inspections ---- */
+  var INSP={
+    'Dagelijkse rondgang kaai':['Vluchtwegen en nooduitgangen vrij','Verkeerszones en markeringen zichtbaar','Geen lekkages of gemorste producten','Verlichting werkt correct','Brandblussers aanwezig & gekeurd','Stapeling stabiel en correct','Afval gesorteerd en weggewerkt','Geen beschadigd materiaal in gebruik'],
+    'PBM-controle ploeg':['Veiligheidsschoenen gedragen','Hi-vis kledij gedragen','Helm waar verplicht','Handschoenen aangepast aan taak','Gehoorbescherming bij lawaai','PBM in goede staat'],
+    'Heftruck pre-use check':['Banden en vorken in orde','Rem en claxon werken','Verlichting & zwaailicht werken','Hefmast & kettingen ok','Geen lekken (olie/hydraulisch)','Veiligheidsgordel aanwezig','Vorige defecten opgelost'],
+    'ISPS toegangscontrole':['Toegangspoort gesloten/bemand','Badges gecontroleerd','Bezoekers geregistreerd','Camera’s operationeel','Geen onbevoegden vastgesteld']
+  };
+  var inspState=[];var inspName='';
+  function openInsp(name,n){
+    inspName=name; document.getElementById('insp-title').textContent=name;
+    var items=INSP[name]||[]; inspState=items.map(()=>null);
+    var c=document.getElementById('insp-items'); c.innerHTML='';
+    items.forEach(function(q,i){
+      var d=document.createElement('div'); d.className='ck-item';
+      d.innerHTML='<div class="q">'+(i+1)+'. '+q+'</div><div class="ck-opts">'+
+        '<div class="ck-opt ok" onclick="setCk('+i+',\'ok\',this)">OK</div>'+
+        '<div class="ck-opt nok" onclick="setCk('+i+',\'nok\',this)">NOK</div>'+
+        '<div class="ck-opt na" onclick="setCk('+i+',\'na\',this)">N.v.t.</div></div>';
+      c.appendChild(d);
+    });
+    updateInsp();
+    go('s-insp');
+  }
+  function setCk(i,val,el){
+    inspState[i]=val;
+    var p=el.parentElement; p.querySelectorAll('.ck-opt').forEach(o=>o.classList.remove('sel'));
+    el.classList.add('sel');
+    updateInsp();
+  }
+  function updateInsp(){
+    var done=inspState.filter(x=>x!==null).length;
+    var nok=inspState.filter(x=>x==='nok').length;
+    var pct=Math.round(done/inspState.length*100);
+    document.getElementById('insp-bar').style.width=pct+'%';
+    document.getElementById('insp-prog').textContent=done+'/'+inspState.length;
+    document.getElementById('insp-nok').textContent=nok;
+  }
+  function submitInsp(){
+    var done=inspState.filter(x=>x!==null).length;
+    if(done<inspState.length){ toast('Beantwoord eerst alle punten'); return; }
+    var nok=inspState.filter(x=>x==='nok').length;
+    addMine('✅',inspName, nok>0?nok+' tekortkoming(en)':'Alles OK', nok>0?'var(--nok)':'var(--ok)');
+    if(nok>0) bumpOpen(nok);
+    showSuccess('Inspectie afgerond',
+      nok>0? ('Checklist opgeslagen. '+nok+' tekortkoming(en) vastgesteld — er is automatisch een actie aangemaakt en een e-mail verstuurd.')
+           : 'Checklist opgeslagen. Geen tekortkomingen vastgesteld. Het rapport is gearchiveerd.',
+      nok>0, nok>0?'<b>quinten.brosens@novanatie.be</b> (QHSE)<br><b>verantwoordelijke ploeg</b>':'',
+      's-insp-list');
+  }
+
+  /* ---- shared ---- */
+  function showSuccess(title,text,showMail,mailto,next){
+    document.getElementById('suc-title').textContent=title;
+    document.getElementById('suc-text').textContent=text;
+    var mb=document.getElementById('suc-mail');
+    if(showMail){ mb.style.display='block'; document.getElementById('suc-mailto').innerHTML=mailto; }
+    else mb.style.display='none';
+    nextAfterSuccess=next;
+    document.getElementById('success').classList.add('show');
+  }
+  function afterSuccess(){ document.getElementById('success').classList.remove('show'); go(nextAfterSuccess); }
+
+  var openCount=3;
+  function bumpOpen(n){ openCount+=(n||1); document.getElementById('st-open').textContent=openCount; }
+
+  var mine=[
+    {ic:'✅',t:'PBM-controle ploeg',s:'Alles OK',c:'var(--ok)',d:'Gisteren'},
+    {ic:'⚠️',t:'Onveilige situatie — CFS magazijn',s:'In behandeling',c:'var(--accent2)',d:'2 dagen geleden'},
+    {ic:'⚠️',t:'Onveilige situatie — Kaai',s:'Afgehandeld',c:'var(--ok)',d:'Vorige week'}
+  ];
+  function renderMine(){
+    var c=document.getElementById('mine-list'); c.innerHTML='';
+    if(mine.length===0){c.innerHTML='<div class="empty">Nog geen meldingen.</div>';return;}
+    mine.forEach(function(m){
+      var r=document.createElement('div'); r.className='list-row';
+      r.innerHTML='<div style="font-size:20px">'+m.ic+'</div><div class="tx"><b>'+m.t+'</b><span>'+m.d+'</span></div>'+
+        '<span class="st" style="background:'+m.c+'22;color:'+m.c+'">'+m.s+'</span>';
+      c.appendChild(r);
+    });
+  }
+  function addMine(ic,t,s,c){ mine.unshift({ic:ic,t:t,s:s,c:c,d:'Zojuist'}); renderMine(); }
+  renderMine();
+</script>
+</body>
+</html>
