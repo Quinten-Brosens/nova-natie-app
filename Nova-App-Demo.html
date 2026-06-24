@@ -153,7 +153,7 @@
   .footer-cta .btn{margin-top:0;}
 
   /* Success overlay */
-  .success{position:absolute;inset:0;background:rgba(11,42,74,.96);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;z-index:20;}
+  .success{position:absolute;inset:0;background:rgba(40,69,50,.97);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;z-index:20;}
   .success.show{display:flex;animation:pop .3s ease;}
   .success .ring{width:96px;height:96px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center;font-size:52px;box-shadow:0 0 0 12px rgba(46,158,91,.2);}
   .success h2{margin:24px 0 8px;font-size:23px;}
@@ -182,17 +182,23 @@
     <div class="login">
       <div class="logo"><b>NOVA</b> <i>NATIE</i></div>
       <div class="tag">Eén app voor heel Nova Natie</div>
-      <div class="field"><label>Gebruiker</label><input id="u-name" value="Quinten Brosens" placeholder="Naam"></div>
-      <div class="field"><label>Wachtwoord</label><input type="password" value="········" placeholder="Wachtwoord"></div>
-      <button class="btn" onclick="go('s-dept')">Aanmelden</button>
-      <button class="btn secondary" onclick="go('s-dept')">Aanmelden met Microsoft 365</button>
+      <div class="field"><label>Gebruiker</label>
+        <select id="u-select" style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:15px;">
+          <option value="" style="color:#333">— Kies je naam —</option>
+          <option value="pieter.geerardyn@nova.be" style="color:#333">Pieter Geerardyn</option>
+          <option value="jonas.dieu@nova.be" style="color:#333">Jonas Dieu</option>
+          <option value="quinten.brosens@nova.be" style="color:#333">Quinten Brosens</option>
+        </select>
+      </div>
+      <div class="field"><label>Wachtwoord</label><input id="u-pass" type="password" placeholder="Wachtwoord"></div>
+      <button class="btn" onclick="doLogin()">Aanmelden</button>
       <div class="hint">Demo-versie · gegevens zijn fictief</div>
     </div>
   </section>
 
   <!-- DEPARTMENT CHOICE -->
   <section class="screen" id="s-dept">
-    <div class="topbar"><h1>Welkom, Quinten<br><span class="sub">Kies je afdeling</span></h1><span class="pill">Nova Natie</span></div>
+    <div class="topbar"><h1>Welkom, <span id="dept-name">Quinten</span><br><span class="sub">Kies je afdeling</span></h1><span class="pill">Nova Natie</span></div>
     <div class="scroll" style="padding-bottom:24px">
       <div class="grid">
         <div class="dept hseq" onclick="go('s-home')"><span class="soon-tag">ACTIEF</span><div class="ic">🦺</div><div class="nm">HSEQ / Preventie</div></div>
@@ -211,15 +217,18 @@
   <section class="screen" id="s-home">
     <div class="topbar"><span class="back" onclick="go('s-dept')">‹</span><h1>HSEQ / Preventie</h1><span class="pill">QHSE</span></div>
     <div class="scroll">
-      <div class="hello"><h2>Goeiedag, Quinten 👋</h2><p>Dinsdag 24 juni 2026 · Nova Natie</p></div>
+      <div class="hello"><h2>Goeiedag, <span id="home-name">Quinten</span> 👋</h2><p id="home-date">Nova Natie</p></div>
       <div class="stats">
-        <div class="stat"><div class="n" id="st-open">3</div><div class="l">Open meldingen</div></div>
-        <div class="stat amber"><div class="n">5</div><div class="l">Acties deze week</div></div>
-        <div class="stat red"><div class="n">12</div><div class="l">Dagen ongevalvrij</div></div>
+        <div class="stat"><div class="n" id="st-open">0</div><div class="l">Open meldingen</div></div>
+        <div class="stat amber"><div class="n" id="st-week">0</div><div class="l">Acties deze week</div></div>
+        <div class="stat red"><div class="n" id="st-days">0</div><div class="l">Dagen ongevalvrij</div></div>
       </div>
       <div class="section-t">Snel melden</div>
       <div class="tile warn" onclick="openMelding()">
         <div class="ic">⚠️</div><div class="tx"><b>Onveilige situatie melden</b><span>Foto · locatie · beschrijving</span></div><div class="arrow">›</div>
+      </div>
+      <div class="tile" onclick="openOpenList()">
+        <div class="ic">📨</div><div class="tx"><b>Open meldingen</b><span>Opvolgen & sluiten</span></div><span class="badge" id="badge-open" style="display:none">0</span><div class="arrow">›</div>
       </div>
       <div class="tile" onclick="go('s-insp-list')">
         <div class="ic">✅</div><div class="tx"><b>Inspectie / checklist</b><span>Rondgang, PBM, ISPS, heftruck …</span></div><div class="arrow">›</div>
@@ -311,7 +320,7 @@
     <div class="topbar"><span class="back" onclick="go('s-insp-list')">‹</span><h1 id="insp-title">Checklist</h1></div>
     <div class="scroll" style="padding-bottom:110px">
       <div class="ck-meta">
-        <div>Uitvoerder: <b>Quinten Brosens</b> · <b id="insp-date">24/06/2026</b></div>
+        <div>Uitvoerder: <b id="insp-user">—</b> · <b id="insp-date">—</b></div>
         <div class="progress"><i id="insp-bar"></i></div>
         <div style="margin-top:6px"><span id="insp-prog">0</span> beantwoord · <span id="insp-nok" style="color:var(--nok);font-weight:700">0</span> tekortkomingen</div>
       </div>
@@ -335,6 +344,35 @@
     </nav>
   </section>
 
+  <!-- OPEN MELDINGEN LIST -->
+  <section class="screen" id="s-open">
+    <div class="topbar"><span class="back" onclick="go('s-home')">‹</span><h1>Open meldingen</h1></div>
+    <div class="scroll">
+      <div class="section-t">Nog op te volgen</div>
+      <div id="open-list"></div>
+    </div>
+    <nav class="nav">
+      <a onclick="go('s-home')"><span class="ic">🏠</span>Home</a>
+      <a onclick="openMelding()"><span class="ic">⚠️</span>Melden</a>
+      <a onclick="go('s-insp-list')"><span class="ic">✅</span>Inspecties</a>
+      <a onclick="go('s-mine')"><span class="ic">📂</span>Mijn meldingen</a>
+    </nav>
+  </section>
+
+  <!-- ITEM DETAIL -->
+  <section class="screen" id="s-item">
+    <div class="topbar"><span class="back" onclick="openOpenList()">‹</span><h1 id="item-title">Melding</h1></div>
+    <div class="scroll" style="padding-bottom:120px">
+      <div class="ck-meta" id="item-info"></div>
+      <div class="form" id="item-solve">
+        <label>Oplossing / genomen maatregel</label>
+        <textarea id="item-oplossing" placeholder="Beschrijf hoe dit werd opgelost …"></textarea>
+      </div>
+      <div id="item-closed" style="display:none;margin:0 16px;"></div>
+    </div>
+    <div class="footer-cta" id="item-cta"><button class="btn" onclick="doCloseItem()">Markeer als opgelost · sluiten</button></div>
+  </section>
+
   <!-- SUCCESS OVERLAY -->
   <div class="success" id="success">
     <div class="ring">✓</div>
@@ -353,6 +391,98 @@
 <script>
   var current='s-login';
   var nextAfterSuccess='s-home';
+
+  /* ---- Accounts ---- */
+  var PASSWORD='TestNova26!';
+  var USERS={
+    'pieter.geerardyn@nova.be':{naam:'Pieter Geerardyn', voornaam:'Pieter', rol:'Directie'},
+    'jonas.dieu@nova.be':{naam:'Jonas Dieu', voornaam:'Jonas', rol:'General Manager Operations'},
+    'quinten.brosens@nova.be':{naam:'Quinten Brosens', voornaam:'Quinten', rol:'QHSE'}
+  };
+  var currentUser=null;
+
+  function doLogin(){
+    var email=document.getElementById('u-select').value;
+    var pass=document.getElementById('u-pass').value;
+    if(!email){ toast('Kies je naam'); return; }
+    if(pass!==PASSWORD){ toast('Verkeerd wachtwoord'); return; }
+    currentUser=Object.assign({email:email}, USERS[email]);
+    document.getElementById('u-pass').value='';
+    // anker-datum voor "dagen ongevalvrij" zetten bij eerste login
+    if(!localStorage.getItem('nova_anchor_'+email)){
+      localStorage.setItem('nova_anchor_'+email, new Date().toISOString());
+    }
+    setUserUI();
+    renderStats();
+    go('s-dept');
+  }
+  function setUserUI(){
+    document.getElementById('dept-name').textContent=currentUser.voornaam;
+    document.getElementById('home-name').textContent=currentUser.voornaam;
+    document.getElementById('m-name').value=currentUser.naam+' — '+currentUser.rol;
+    var d=new Date();
+    var dagen=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+    var maanden=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+    document.getElementById('home-date').textContent=
+      dagen[d.getDay()]+' '+d.getDate()+' '+maanden[d.getMonth()]+' '+d.getFullYear()+' · Nova Natie';
+  }
+
+  /* ---- Opslag per gebruiker (localStorage) ---- */
+  function storeKey(){ return 'nova_items_'+(currentUser?currentUser.email:'anon'); }
+  function loadItems(){
+    try{ return JSON.parse(localStorage.getItem(storeKey())||'[]'); }catch(e){ return []; }
+  }
+  function saveItems(arr){ localStorage.setItem(storeKey(), JSON.stringify(arr)); }
+  function addItem(it){
+    var arr=loadItems();
+    it.id='it'+new Date().getTime()+Math.floor(Math.random()*1000);
+    it.datum=new Date().toISOString();
+    it.status='open';
+    arr.unshift(it);
+    saveItems(arr);
+    renderStats();
+  }
+  function closeItem(id, oplossing){
+    var arr=loadItems();
+    for(var i=0;i<arr.length;i++){
+      if(arr[i].id===id){
+        arr[i].status='gesloten';
+        arr[i].oplossing=oplossing;
+        arr[i].geslotenDoor=currentUser.naam;
+        arr[i].geslotenOp=new Date().toISOString();
+      }
+    }
+    saveItems(arr);
+    renderStats();
+  }
+
+  function fmtDate(iso){
+    var d=new Date(iso);
+    return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear()+
+      ' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  }
+  function relTime(iso){
+    var diff=(new Date()-new Date(iso))/1000;
+    if(diff<60) return 'Zojuist';
+    if(diff<3600) return Math.floor(diff/60)+' min geleden';
+    if(diff<86400) return Math.floor(diff/3600)+' u geleden';
+    return Math.floor(diff/86400)+' dag(en) geleden';
+  }
+
+  /* ---- Live tellers ---- */
+  function renderStats(){
+    var arr=loadItems();
+    var open=arr.filter(function(x){return x.status==='open';}).length;
+    var weekAgo=new Date()-7*86400*1000;
+    var week=arr.filter(function(x){return new Date(x.datum)>=weekAgo;}).length;
+    var anchor=localStorage.getItem('nova_anchor_'+(currentUser?currentUser.email:''));
+    var days=anchor? Math.floor((new Date()-new Date(anchor))/86400000) : 0;
+    document.getElementById('st-open').textContent=open;
+    document.getElementById('st-week').textContent=week;
+    document.getElementById('st-days').textContent=days;
+    var b=document.getElementById('badge-open');
+    if(open>0){ b.style.display='inline-block'; b.textContent=open; } else { b.style.display='none'; }
+  }
 
   function go(id){
     document.getElementById(current).classList.remove('active');
@@ -390,8 +520,12 @@
     var loc=document.getElementById('m-loc').value;
     var melder=document.getElementById('m-name').value;
     var cat=document.querySelector('#m-cat .chip.sel');
-    addMine('⚠️','Onveilige situatie — '+loc, urg.textContent, urg.textContent==='Hoog'?'var(--nok)':urg.textContent==='Gemiddeld'?'var(--accent2)':'var(--ok)');
-    bumpOpen();
+    addItem({
+      soort:'melding', icon:'⚠️',
+      type:'Onveilige situatie', titel:'Onveilige situatie — '+loc,
+      locatie:loc, categorie:cat?cat.textContent:'—',
+      urgentie:urg.textContent, beschrijving:desc, melder:melder
+    });
     emailjs.send('nova_natie','template_odoyxs2',{
       melding_type:'Onveilige situatie'+(cat?' — '+cat.textContent:''),
       locatie:loc,
@@ -415,6 +549,8 @@
   var inspState=[];var inspName='';
   function openInsp(name,n){
     inspName=name; document.getElementById('insp-title').textContent=name;
+    document.getElementById('insp-user').textContent=currentUser?currentUser.naam:'—';
+    document.getElementById('insp-date').textContent=fmtDate(new Date().toISOString());
     var items=INSP[name]||[]; inspState=items.map(()=>null);
     var c=document.getElementById('insp-items'); c.innerHTML='';
     items.forEach(function(q,i){
@@ -446,15 +582,22 @@
     var done=inspState.filter(x=>x!==null).length;
     if(done<inspState.length){ toast('Beantwoord eerst alle punten'); return; }
     var nok=inspState.filter(x=>x==='nok').length;
-    addMine('✅',inspName, nok>0?nok+' tekortkoming(en)':'Alles OK', nok>0?'var(--nok)':'var(--ok)');
+    var melder=currentUser?currentUser.naam+' — '+currentUser.rol:'—';
     if(nok>0){
-      bumpOpen(nok);
+      addItem({
+        soort:'inspectie', icon:'✅',
+        type:'Inspectie', titel:'Inspectie — '+inspName,
+        locatie:inspName, categorie:'Tekortkoming',
+        urgentie:nok+' tekortkoming(en)',
+        beschrijving:'Checklist "'+inspName+'" afgerond. '+nok+' punt(en) als NOK aangeduid.',
+        melder:melder
+      });
       emailjs.send('nova_natie','template_odoyxs2',{
         melding_type:'Inspectie — '+inspName,
         locatie:inspName,
         urgentie:nok+' tekortkoming(en) vastgesteld',
         beschrijving:'Checklist afgerond. '+nok+' punt(en) als NOK aangeduid.',
-        melder:'Quinten Brosens — QHSE'
+        melder:melder
       }).catch(function(e){console.warn('EmailJS fout:',e);});
     }
     showSuccess('Inspectie afgerond',
@@ -476,26 +619,102 @@
   }
   function afterSuccess(){ document.getElementById('success').classList.remove('show'); go(nextAfterSuccess); }
 
-  var openCount=3;
-  function bumpOpen(n){ openCount+=(n||1); document.getElementById('st-open').textContent=openCount; }
-
-  var mine=[
-    {ic:'✅',t:'PBM-controle ploeg',s:'Alles OK',c:'var(--ok)',d:'Gisteren'},
-    {ic:'⚠️',t:'Onveilige situatie — CFS magazijn',s:'In behandeling',c:'var(--accent2)',d:'2 dagen geleden'},
-    {ic:'⚠️',t:'Onveilige situatie — Kaai',s:'Afgehandeld',c:'var(--ok)',d:'Vorige week'}
-  ];
-  function renderMine(){
-    var c=document.getElementById('mine-list'); c.innerHTML='';
-    if(mine.length===0){c.innerHTML='<div class="empty">Nog geen meldingen.</div>';return;}
-    mine.forEach(function(m){
-      var r=document.createElement('div'); r.className='list-row';
-      r.innerHTML='<div style="font-size:20px">'+m.ic+'</div><div class="tx"><b>'+m.t+'</b><span>'+m.d+'</span></div>'+
-        '<span class="st" style="background:'+m.c+'22;color:'+m.c+'">'+m.s+'</span>';
+  /* ---- Open meldingen-lijst ---- */
+  function urgColor(u){
+    if(!u) return 'var(--accent2)';
+    if(u.indexOf('Hoog')>=0) return 'var(--nok)';
+    if(u.indexOf('Gemiddeld')>=0) return 'var(--accent2)';
+    if(u.indexOf('tekortkoming')>=0) return 'var(--nok)';
+    return 'var(--ok)';
+  }
+  function openOpenList(){ renderOpenList(); go('s-open'); }
+  function renderOpenList(){
+    var arr=loadItems().filter(function(x){return x.status==='open';});
+    var c=document.getElementById('open-list'); c.innerHTML='';
+    if(arr.length===0){ c.innerHTML='<div class="empty">🎉 Geen open meldingen.<br>Alles is opgevolgd.</div>'; return; }
+    arr.forEach(function(m){
+      var col=urgColor(m.urgentie);
+      var r=document.createElement('div'); r.className='list-row'; r.style.cursor='pointer';
+      r.onclick=function(){ openItem(m.id); };
+      r.innerHTML='<div class="dot" style="background:'+col+'"></div>'+
+        '<div style="font-size:20px">'+(m.icon||'⚠️')+'</div>'+
+        '<div class="tx"><b>'+m.titel+'</b><span>'+m.urgentie+' · '+relTime(m.datum)+'</span></div>'+
+        '<div class="arrow" style="color:var(--muted);font-size:20px">›</div>';
       c.appendChild(r);
     });
   }
-  function addMine(ic,t,s,c){ mine.unshift({ic:ic,t:t,s:s,c:c,d:'Zojuist'}); renderMine(); }
-  renderMine();
+
+  /* ---- Item detail + sluiten ---- */
+  var currentItemId=null;
+  function openItem(id){
+    currentItemId=id;
+    var m=loadItems().filter(function(x){return x.id===id;})[0];
+    if(!m){ openOpenList(); return; }
+    document.getElementById('item-title').textContent=m.type||'Melding';
+    var info=document.getElementById('item-info');
+    info.innerHTML=
+      '<div style="font-size:15px;color:var(--ink);font-weight:700;margin-bottom:8px">'+m.titel+'</div>'+
+      row('Locatie',m.locatie)+
+      row('Categorie',m.categorie)+
+      row('Urgentie',m.urgentie)+
+      row('Beschrijving',m.beschrijving)+
+      row('Gemeld door',m.melder)+
+      row('Datum',fmtDate(m.datum));
+    if(m.status==='gesloten'){
+      document.getElementById('item-solve').style.display='none';
+      document.getElementById('item-cta').style.display='none';
+      var cl=document.getElementById('item-closed');
+      cl.style.display='block';
+      cl.innerHTML='<div class="ck-meta" style="margin:12px 0;border-left:4px solid var(--ok)">'+
+        '<div style="color:var(--ok);font-weight:700;margin-bottom:6px">✓ Gesloten</div>'+
+        row('Oplossing',m.oplossing)+row('Gesloten door',m.geslotenDoor)+row('Gesloten op',fmtDate(m.geslotenOp))+'</div>';
+    } else {
+      document.getElementById('item-solve').style.display='block';
+      document.getElementById('item-cta').style.display='block';
+      document.getElementById('item-closed').style.display='none';
+      document.getElementById('item-oplossing').value='';
+    }
+    go('s-item');
+  }
+  function row(label,val){
+    return '<div style="margin:7px 0"><span style="color:var(--muted)">'+label+':</span> <b style="color:var(--ink);font-weight:600">'+(val||'—')+'</b></div>';
+  }
+  function doCloseItem(){
+    var opl=document.getElementById('item-oplossing').value.trim();
+    if(!opl){ toast('Vul eerst een oplossing in'); return; }
+    closeItem(currentItemId, opl);
+    showSuccess('Melding gesloten',
+      'De melding is afgehandeld en gemarkeerd als opgelost. Ze verschijnt nu onder "Mijn meldingen" als gesloten.',
+      false,'','s-open');
+    nextAfterSuccess='s-open';
+  }
+
+  /* ---- Mijn meldingen (uit opslag) ---- */
+  function renderMine(){
+    var arr=loadItems();
+    var c=document.getElementById('mine-list'); c.innerHTML='';
+    if(arr.length===0){ c.innerHTML='<div class="empty">Nog geen meldingen.</div>'; return; }
+    arr.forEach(function(m){
+      var open=m.status==='open';
+      var col=open?urgColor(m.urgentie):'var(--ok)';
+      var st=open?'Open':'Gesloten';
+      var r=document.createElement('div'); r.className='list-row'; r.style.cursor='pointer';
+      r.onclick=function(){ openItem(m.id); };
+      r.innerHTML='<div style="font-size:20px">'+(m.icon||'⚠️')+'</div>'+
+        '<div class="tx"><b>'+m.titel+'</b><span>'+relTime(m.datum)+'</span></div>'+
+        '<span class="st" style="background:'+col+'22;color:'+col+'">'+st+'</span>';
+      c.appendChild(r);
+    });
+  }
+
+  // "Mijn meldingen" en "Open meldingen" verversen telkens het scherm getoond wordt
+  var _go=go;
+  go=function(id){
+    if(id==='s-mine') renderMine();
+    if(id==='s-open') renderOpenList();
+    if(id==='s-home') renderStats();
+    _go(id);
+  };
 </script>
 </body>
 </html>
