@@ -187,7 +187,6 @@
           <option value="quinten.brosens@nova.be" style="color:#333">Quinten Brosens</option>
         </select>
       </div>
-      <div class="field"><label>Wachtwoord</label><input id="u-pass" type="password" placeholder="Wachtwoord"></div>
       <button class="btn" onclick="doLogin()">Aanmelden</button>
       <div class="hint">Demo-versie · gegevens zijn fictief</div>
     </div>
@@ -249,9 +248,9 @@
     <div class="scroll" style="padding-bottom:110px">
       <div class="form">
         <label>Foto</label>
-        <input type="file" accept="image/*" capture="environment" id="photo-in" style="display:none" onchange="prevPhoto(event)">
+        <input type="file" accept="image/*" id="photo-in" style="display:none" onchange="prevPhoto(event)">
         <div class="photo-btn" onclick="document.getElementById('photo-in').click()">
-          <div class="big">📷</div><div>Tik om foto te maken of te kiezen</div>
+          <div class="big">📷</div><div>Tik om een foto te maken of uit je galerij te kiezen</div>
         </div>
         <img class="photo-prev" id="photo-prev">
 
@@ -400,11 +399,8 @@
 
   function doLogin(){
     var email=document.getElementById('u-select').value;
-    var pass=document.getElementById('u-pass').value;
     if(!email){ toast('Kies je naam'); return; }
-    if(pass!==PASSWORD){ toast('Verkeerd wachtwoord'); return; }
     currentUser=Object.assign({email:email}, USERS[email]);
-    document.getElementById('u-pass').value='';
     // anker-datum voor "dagen ongevalvrij" zetten bij eerste login
     if(!localStorage.getItem('nova_anchor_'+email)){
       localStorage.setItem('nova_anchor_'+email, new Date().toISOString());
@@ -499,15 +495,44 @@
   }
   function openMelding(){
     // reset
+    currentPhotoData=null;
+    document.getElementById('photo-in').value='';
     document.getElementById('photo-prev').style.display='none';
     document.getElementById('m-desc').value='';
     document.querySelectorAll('#m-cat .chip,#m-urg .chip').forEach(c=>c.classList.remove('sel'));
     go('s-melding');
   }
+  var currentPhotoData=null;
   function prevPhoto(e){
     var f=e.target.files[0]; if(!f)return;
-    var img=document.getElementById('photo-prev');
-    img.src=URL.createObjectURL(f); img.style.display='block';
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var image=new Image();
+      image.onload=function(){
+        var max=1000, w=image.width, h=image.height;
+        if(w>h && w>max){ h=Math.round(h*max/w); w=max; }
+        else if(h>=w && h>max){ w=Math.round(w*max/h); h=max; }
+        var canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(image,0,0,w,h);
+        var BUDGET=42000; // EmailJS-veldlimiet (~50KB) — marge houden
+        var q=0.7, data=canvas.toDataURL('image/jpeg',q);
+        // 1) kwaliteit verlagen tot onder budget
+        while(data.length>BUDGET && q>0.3){ q-=0.1; data=canvas.toDataURL('image/jpeg',q); }
+        // 2) indien nog te groot: afmetingen verder verkleinen
+        while(data.length>BUDGET && canvas.width>400){
+          canvas.width=Math.round(canvas.width*0.8);
+          canvas.height=Math.round(canvas.height*0.8);
+          canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+          data=canvas.toDataURL('image/jpeg',0.6);
+        }
+        currentPhotoData=data;
+        var img=document.getElementById('photo-prev');
+        img.src=currentPhotoData; img.style.display='block';
+      };
+      image.src=ev.target.result;
+    };
+    reader.readAsDataURL(f);
   }
   function submitMelding(){
     var desc=document.getElementById('m-desc').value.trim();
@@ -521,15 +546,18 @@
       soort:'melding', icon:'⚠️',
       type:'Onveilige situatie', titel:'Onveilige situatie — '+loc,
       locatie:loc, categorie:cat?cat.textContent:'—',
-      urgentie:urg.textContent, beschrijving:desc, melder:melder
+      urgentie:urg.textContent, beschrijving:desc, melder:melder,
+      foto:currentPhotoData||''
     });
-    emailjs.send('nova_natie','template_odoyxs2',{
+    var mailParams={
       melding_type:'Onveilige situatie'+(cat?' — '+cat.textContent:''),
       locatie:loc,
       urgentie:urg.textContent,
       beschrijving:desc,
-      melder:melder
-    }).catch(function(e){console.warn('EmailJS fout:',e);});
+      melder:melder,
+      foto:currentPhotoData||''
+    };
+    emailjs.send('nova_natie','template_odoyxs2',mailParams).catch(function(e){console.warn('EmailJS fout:',e);});
     showSuccess('Melding verzonden',
       'Je melding is geregistreerd en doorgestuurd naar de QHSE-verantwoordelijke. Bij urgentie "Hoog" krijgt ook de leidinggevende meteen bericht.',
       true,'<b>quinten.brosens@nova.be</b> (QHSE)'+(urg.textContent==='Hoog'?'<br><b>jonas.dieu@nova.be</b> (General Manager Operations)':''),
@@ -656,7 +684,8 @@
       row('Urgentie',m.urgentie)+
       row('Beschrijving',m.beschrijving)+
       row('Gemeld door',m.melder)+
-      row('Datum',fmtDate(m.datum));
+      row('Datum',fmtDate(m.datum))+
+      (m.foto?'<div style="margin-top:10px"><img src="'+m.foto+'" style="width:100%;border-radius:10px;border:1px solid var(--line)"></div>':'');
     if(m.status==='gesloten'){
       document.getElementById('item-solve').style.display='none';
       document.getElementById('item-cta').style.display='none';
