@@ -1,0 +1,24 @@
+{
+  "name": "Nova Natie App",
+  "short_name": "Nova Natie",
+  "description": "HSEQ & bedrijfsapp voor Nova Natie",
+  "start_url": "./Nova-App-Demo.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#284532",
+  "theme_color": "#284532",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
