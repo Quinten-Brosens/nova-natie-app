@@ -10,6 +10,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Nova Natie App — Demo</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("UuZMKHnCY9YyNMW92");</script>
 <style>
   :root{
     --navy:#284532;       /* Nova hoofdkleur donkergroen */
@@ -340,7 +342,7 @@
     <p id="suc-text"></p>
     <div class="mailbox" id="suc-mail">
       <div class="to">📧 Automatische e-mail verstuurd naar:</div>
-      <div id="suc-mailto"><b>quinten.brosens@novanatie.be</b> (QHSE)</div>
+      <div id="suc-mailto"><b>quinten.brosens@nova.be</b> (QHSE)</div>
     </div>
     <button class="btn" style="max-width:320px;margin-top:26px" onclick="afterSuccess()">Klaar</button>
   </div>
@@ -386,12 +388,20 @@
     if(!desc){ toast('Vul een korte beschrijving in'); return; }
     if(!urg){ toast('Kies een urgentie'); return; }
     var loc=document.getElementById('m-loc').value;
+    var melder=document.getElementById('m-name').value;
+    var cat=document.querySelector('#m-cat .chip.sel');
     addMine('⚠️','Onveilige situatie — '+loc, urg.textContent, urg.textContent==='Hoog'?'var(--nok)':urg.textContent==='Gemiddeld'?'var(--accent2)':'var(--ok)');
     bumpOpen();
-    document.getElementById('st-open');
+    emailjs.send('nova_natie','template_odoyxs2',{
+      melding_type:'Onveilige situatie'+(cat?' — '+cat.textContent:''),
+      locatie:loc,
+      urgentie:urg.textContent,
+      beschrijving:desc,
+      melder:melder
+    }).catch(function(e){console.warn('EmailJS fout:',e);});
     showSuccess('Melding verzonden',
       'Je melding is geregistreerd en doorgestuurd naar de QHSE-verantwoordelijke. Bij urgentie "Hoog" krijgt ook de leidinggevende meteen bericht.',
-      true,'<b>quinten.brosens@novanatie.be</b> (QHSE)'+(urg.textContent==='Hoog'?'<br><b>jonas.dieu@novanatie.be</b> (General Manager Operations)':''),
+      true,'<b>quinten.brosens@nova.be</b> (QHSE)'+(urg.textContent==='Hoog'?'<br><b>jonas.dieu@nova.be</b> (General Manager Operations)':''),
       's-home');
   }
 
@@ -437,11 +447,20 @@
     if(done<inspState.length){ toast('Beantwoord eerst alle punten'); return; }
     var nok=inspState.filter(x=>x==='nok').length;
     addMine('✅',inspName, nok>0?nok+' tekortkoming(en)':'Alles OK', nok>0?'var(--nok)':'var(--ok)');
-    if(nok>0) bumpOpen(nok);
+    if(nok>0){
+      bumpOpen(nok);
+      emailjs.send('nova_natie','template_odoyxs2',{
+        melding_type:'Inspectie — '+inspName,
+        locatie:inspName,
+        urgentie:nok+' tekortkoming(en) vastgesteld',
+        beschrijving:'Checklist afgerond. '+nok+' punt(en) als NOK aangeduid.',
+        melder:'Quinten Brosens — QHSE'
+      }).catch(function(e){console.warn('EmailJS fout:',e);});
+    }
     showSuccess('Inspectie afgerond',
       nok>0? ('Checklist opgeslagen. '+nok+' tekortkoming(en) vastgesteld — er is automatisch een actie aangemaakt en een e-mail verstuurd.')
            : 'Checklist opgeslagen. Geen tekortkomingen vastgesteld. Het rapport is gearchiveerd.',
-      nok>0, nok>0?'<b>quinten.brosens@novanatie.be</b> (QHSE)<br><b>verantwoordelijke ploeg</b>':'',
+      nok>0, nok>0?'<b>quinten.brosens@nova.be</b> (QHSE)<br><b>verantwoordelijke ploeg</b>':'',
       's-insp-list');
   }
 
