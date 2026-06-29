@@ -3,7 +3,8 @@
 var USERS = {
   'pieter.geerardyn@nova.be': { naam: 'Pieter Geerardyn', voornaam: 'Pieter', rol: 'Directie' },
   'jonas.dieu@nova.be':       { naam: 'Jonas Dieu',       voornaam: 'Jonas',  rol: 'General Manager Operations' },
-  'quinten.brosens@nova.be':  { naam: 'Quinten Brosens',  voornaam: 'Quinten',rol: 'QHSE' }
+  'quinten.brosens@nova.be':  { naam: 'Quinten Brosens',  voornaam: 'Quinten',rol: 'QHSE' },
+  'ruben.audenaert@nova.be':  { naam: 'Ruben Audenaert',  voornaam: 'Ruben',  rol: 'Medewerker' }
 };
 
 var currentUser = null;
