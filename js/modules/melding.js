@@ -57,14 +57,27 @@ function submitMelding() {
     urgentie: urg.textContent, beschrijving: desc, melder: melder,
     foto: currentPhotoData || ''
   });
-  emailjs.send('nova_natie', 'template_odoyxs2', {
-    melding_type: 'Onveilige situatie' + (cat ? ' — ' + cat.textContent : ''),
-    locatie: loc,
-    urgentie: urg.textContent,
-    beschrijving: desc,
-    melder: melder,
-    foto: currentPhotoData || ''
-  }).catch(function (e) { console.warn('EmailJS fout:', e); });
+  var catTxt = cat ? cat.textContent : '—';
+  var recipients = ['quinten.brosens@nova.be'];
+  if (urg.textContent === 'Hoog') recipients.push('jonas.dieu@nova.be');
+  var htmlBody =
+    '<div style="font-family:Arial,sans-serif;color:#284532">' +
+    '<h2 style="color:#284532">⚠️ Onveilige situatie gemeld</h2>' +
+    '<p><b>Categorie:</b> ' + escapeHtml(catTxt) + '<br>' +
+    '<b>Locatie:</b> ' + escapeHtml(loc) + '<br>' +
+    '<b>Urgentie:</b> ' + escapeHtml(urg.textContent) + '<br>' +
+    '<b>Melder:</b> ' + escapeHtml(melder) + '</p>' +
+    '<p><b>Beschrijving:</b><br>' + escapeHtml(desc).replace(/\n/g, '<br>') + '</p>' +
+    '<hr><p style="font-size:12px;color:#88A595">Verzonden via de Nova Natie App</p></div>';
+  sendGraphMail({
+    to: recipients,
+    subject: '[Nova HSEQ] Onveilige situatie — ' + loc + ' (' + urg.textContent + ')',
+    html: htmlBody,
+    photoDataUrl: currentPhotoData || ''
+  }).catch(function (e) {
+    console.warn('Graph mail fout:', e);
+    toast('Mail versturen mislukt — melding is wel lokaal opgeslagen');
+  });
   showSuccess('Melding verzonden',
     'Je melding is geregistreerd en doorgestuurd naar de QHSE-verantwoordelijke. Bij urgentie "Hoog" krijgt ook de leidinggevende meteen bericht.',
     true,

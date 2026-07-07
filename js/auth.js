@@ -9,16 +9,31 @@ var USERS = {
 
 var currentUser = null;
 
-function doLogin() {
-  var email = document.getElementById('u-select').value;
-  if (!email) { toast('Kies je naam'); return; }
-  currentUser = Object.assign({ email: email }, USERS[email]);
-  if (!localStorage.getItem('nova_anchor_' + email)) {
-    localStorage.setItem('nova_anchor_' + email, new Date().toISOString());
+async function doLogin() {
+  var btn = document.getElementById('login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Bezig met aanmelden…'; }
+  try {
+    var account = await graphLogin();
+    var email = (account.username || '').toLowerCase();
+    // Bekende gebruikers krijgen hun geconfigureerde rol; anderen vallen terug op "Medewerker"
+    var info = USERS[email] || {
+      naam: account.name || email,
+      voornaam: (account.name || email).split(' ')[0],
+      rol: 'Medewerker'
+    };
+    currentUser = Object.assign({ email: email }, info);
+    if (!localStorage.getItem('nova_anchor_' + email)) {
+      localStorage.setItem('nova_anchor_' + email, new Date().toISOString());
+    }
+    setUserUI();
+    renderStats();
+    go('s-dept');
+  } catch (e) {
+    console.warn('Login fout:', e);
+    toast('Aanmelden mislukt of geannuleerd');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Aanmelden met Microsoft 365'; }
   }
-  setUserUI();
-  renderStats();
-  go('s-dept');
 }
 
 function setUserUI() {
