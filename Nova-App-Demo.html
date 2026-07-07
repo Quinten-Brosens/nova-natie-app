@@ -244,6 +244,11 @@
       <span class="pill" id="tb-topbar-count">0 actief</span>
     </div>
     <div id="tb-tabs"></div>
+    <div class="tb-toolbar">
+      <button onclick="tbImportPrompt()">⬇️ Importeer</button>
+      <button onclick="tbExport()">⬆️ Exporteer</button>
+      <input type="file" id="tb-import-in" accept="application/json,.json" style="display:none" onchange="tbImport(event)">
+    </div>
     <div class="scroll" style="padding-bottom:80px">
       <div id="tb-list"></div>
     </div>

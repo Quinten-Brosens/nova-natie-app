@@ -370,6 +370,50 @@ function tbConfirmAdd() {
   tbRender();
 }
 
+/* ---- Import / export (overzetten losstaand bord ↔ app, per gebruiker) ---- */
+function tbExport() {
+  tbEnsureLoaded();
+  var naam = currentUser ? currentUser.email.split('@')[0] : 'takenbord';
+  var blob = new Blob([JSON.stringify(tbData, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'takenbord-' + naam + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('Takenbord geëxporteerd');
+}
+
+function tbImportPrompt() {
+  document.getElementById('tb-import-in').click();
+}
+
+function tbImport(e) {
+  var f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var incoming;
+    try { incoming = JSON.parse(ev.target.result); } catch (err) { toast('⚠️ Ongeldig bestand'); return; }
+    if (!incoming || !incoming.tasks) { toast('⚠️ Geen geldig takenbord'); return; }
+    tbEnsureLoaded();
+    var ids = new Set(TB_SECTIONS.flatMap(function(sec) { return tbData.tasks[sec].map(function(t) { return t.id; }); }));
+    var added = 0;
+    TB_SECTIONS.forEach(function(sec) {
+      (incoming.tasks[sec] || []).forEach(function(t) {
+        if (!ids.has(t.id)) { tbData.tasks[sec].push(t); ids.add(t.id); added++; }
+      });
+    });
+    tbNextId = Math.max.apply(null, [tbNextId].concat(TB_SECTIONS.flatMap(function(sec) {
+      return tbData.tasks[sec].map(function(t) { return typeof t.id === 'number' ? t.id : 0; });
+    }))) + 1;
+    tbSave();
+    tbRender();
+    toast(added ? (added + ' taak/taken geïmporteerd') : 'Alles was al aanwezig');
+  };
+  reader.readAsText(f);
+}
+
 /* ---- Hook in go() override ---- */
 var _tbGo = go;
 go = function(id) {
