@@ -157,3 +157,18 @@ body{background:linear-gradient(135deg,#284532,#33543f);min-height:100vh;display
 .list-row .tx b{font-size:14px;}
 .list-row .tx span{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;}
 .list-row .st{font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;}
+.list-row .arrow{color:var(--muted);font-size:20px;flex-shrink:0;}
+
+/* Takenbord */
+.tb-tabs{display:flex;overflow-x:auto;padding:10px 12px 0;gap:6px;background:var(--card);border-bottom:1px solid var(--line);flex-shrink:0;}
+.tb-tabs::-webkit-scrollbar{display:none;}
+.tb-tab{white-space:nowrap;padding:9px 14px;border-radius:10px 10px 0 0;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+.tb-tab.active{background:var(--navy);color:#fff;}
+.tb-count{background:rgba(40,69,50,.12);color:var(--muted);border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px;}
+.tb-tab.active .tb-count{background:rgba(255,255,255,.2);color:#fff;}
+.tb-cb{width:22px;height:22px;min-width:22px;border:2px solid var(--green-mid);border-radius:6px;cursor:pointer;flex-shrink:0;background:#fff;position:relative;}
+.tb-cb.chk{background:var(--navy);border-color:var(--navy);}
+.tb-cb.chk::after{content:'';position:absolute;top:3px;left:7px;width:4px;height:8px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);}
+.tb-done{opacity:.55;}
+.tb-badge{background:rgba(201,131,58,.18);color:var(--accent2);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;}
+.tb-person{background:rgba(40,69,50,.1);color:var(--navy);border-radius:5px;padding:2px 7px;font-size:11px;}
