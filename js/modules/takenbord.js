@@ -216,6 +216,26 @@ function tbDeleteTask() {
   tbSave(); tbRender(); go('s-taken');
 }
 
+function tbToggleDone(task) {
+  task.done = !task.done;
+  var found = tbFindTask(task.id);
+  if (found) {
+    if (task.done && found.section !== 'Done') {
+      // Afgevinkt → automatisch naar "Klaar"
+      task._prevSection = found.section;
+      tbData.tasks[found.section] = tbData.tasks[found.section].filter(function(t) { return t.id !== task.id; });
+      (tbData.tasks['Done'] = tbData.tasks['Done'] || []).unshift(task);
+    } else if (!task.done && found.section === 'Done') {
+      // Weer open → terug naar vorige kolom (of Actief)
+      var back = task._prevSection && found.section !== task._prevSection ? task._prevSection : 'Active';
+      tbData.tasks['Done'] = tbData.tasks['Done'].filter(function(t) { return t.id !== task.id; });
+      (tbData.tasks[back] = tbData.tasks[back] || []).unshift(task);
+    }
+  }
+  tbSave();
+  tbRender();
+}
+
 function tbMoveTask(taskId, toSection) {
   var found = tbFindTask(taskId); if (!found || found.section === toSection) return;
   tbData.tasks[found.section] = tbData.tasks[found.section].filter(function(t) { return t.id !== taskId; });
