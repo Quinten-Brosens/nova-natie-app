@@ -22,8 +22,17 @@
     <div class="login">
       <div class="logo"><b>NOVA</b> <i>NATIE</i></div>
       <div class="tag">Eén app voor heel Nova Natie</div>
-      <button class="btn" id="login-btn" onclick="doLogin()">Aanmelden met Microsoft 365</button>
-      <div class="hint">Meld je aan met je Nova Natie-account (@nova.be)</div>
+      <div class="field"><label>Gebruiker</label>
+        <select id="u-select" style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:15px;">
+          <option value="" style="color:#333">— Kies je naam —</option>
+          <option value="pieter.geerardyn@nova.be" style="color:#333">Pieter Geerardyn</option>
+          <option value="jonas.dieu@nova.be" style="color:#333">Jonas Dieu</option>
+          <option value="quinten.brosens@nova.be" style="color:#333">Quinten Brosens</option>
+          <option value="ruben.audenaert@nova.be" style="color:#333">Ruben Audenaert</option>
+        </select>
+      </div>
+      <button class="btn" onclick="doLogin()">Aanmelden</button>
+      <div class="hint">Demo-versie · gegevens zijn fictief</div>
     </div>
   </section>
 
@@ -249,10 +258,10 @@
        → maak js/modules/mijnmodule.js
        → voeg <script src="js/modules/mijnmodule.js"> toe onderaan
 ════════════════════════════════════════════════════════ -->
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("UuZMKHnCY9YyNMW92");</script>
 
 <script src="js/core.js"></script>
-<script src="js/graph.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/data.js"></script>
 
