@@ -14,6 +14,13 @@ function soon(name) {
   toast(name + ' — module volgt in volgende fase');
 }
 
+/* HTML-escaping — tegen weergavefouten en injectie bij vrije tekst */
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function toast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg;

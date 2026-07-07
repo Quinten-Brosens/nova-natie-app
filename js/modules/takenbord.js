@@ -136,11 +136,13 @@ function tbRenderList() {
     var tx = document.createElement('div');
     tx.className = 'tx';
     var meta = '';
-    if (task.badge) meta += '<span class="tb-badge">' + task.badge + '</span> ';
-    (task.betrokkenen || []).forEach(function(p) { meta += '<span class="tb-person">👤 ' + p + '</span> '; });
+    if (task.badge) meta += '<span class="tb-badge">' + escapeHtml(task.badge) + '</span> ';
+    (task.betrokkenen || []).forEach(function(p) { meta += '<span class="tb-person">👤 ' + escapeHtml(p) + '</span> '; });
+    var nBijl = (task.bijlagen || []).length;
+    if (nBijl) meta += '<span class="tb-person">📎 ' + nBijl + '</span> ';
     tx.innerHTML =
-      '<b style="' + (task.done ? 'text-decoration:line-through;color:var(--muted)' : '') + '">' + task.title + '</b>' +
-      (task.note ? '<span>' + task.note + '</span>' : '') +
+      '<b style="' + (task.done ? 'text-decoration:line-through;color:var(--muted)' : '') + '">' + escapeHtml(task.title) + '</b>' +
+      (task.note ? '<span>' + escapeHtml(task.note) + '</span>' : '') +
       (meta ? '<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">' + meta + '</div>' : '');
 
     var arr = document.createElement('div');
@@ -162,6 +164,7 @@ function tbOpenDetail(id) {
   document.getElementById('tb-d-desc').value = task.beschrijving || '';
   document.getElementById('tb-d-note').value = task.note || '';
   tbRefreshPersonTags(task.betrokkenen || []);
+  tbRenderBijlagen(task.bijlagen || []);
   var moveRow = document.getElementById('tb-move-row');
   moveRow.innerHTML = '';
   TB_SECTIONS.forEach(function(sec) {
@@ -178,7 +181,7 @@ function tbRefreshPersonTags(people) {
   var c = document.getElementById('tb-person-tags'); if (!c) return;
   c.innerHTML = people.map(function(p, i) {
     return '<div style="display:flex;align-items:center;gap:4px;background:rgba(40,69,50,.1);color:var(--navy);border-radius:6px;padding:4px 10px;font-size:13px">' +
-      p + ' <span style="cursor:pointer;color:var(--muted);margin-left:4px" onclick="tbRemovePerson(' + i + ')">×</span></div>';
+      escapeHtml(p) + ' <span style="cursor:pointer;color:var(--muted);margin-left:4px" onclick="tbRemovePerson(' + i + ')">×</span></div>';
   }).join('');
 }
 
@@ -187,14 +190,81 @@ function tbAddPerson() {
   var name = inp.value.trim(); if (!name) return;
   var found = tbFindTask(tbCurrentTaskId); if (!found) return;
   if (!found.task.betrokkenen) found.task.betrokkenen = [];
-  if (!found.task.betrokkenen.includes(name)) { found.task.betrokkenen.push(name); tbRefreshPersonTags(found.task.betrokkenen); }
+  if (!found.task.betrokkenen.includes(name)) { found.task.betrokkenen.push(name); tbSave(); tbRefreshPersonTags(found.task.betrokkenen); }
   inp.value = '';
 }
 
 function tbRemovePerson(idx) {
   var found = tbFindTask(tbCurrentTaskId); if (!found) return;
   found.task.betrokkenen.splice(idx, 1);
+  tbSave();
   tbRefreshPersonTags(found.task.betrokkenen);
+}
+
+/* ---- Bijlagen ---- */
+function tbFmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function tbRenderBijlagen(list) {
+  var c = document.getElementById('tb-bijlagen'); if (!c) return;
+  list = list || [];
+  c.innerHTML = list.map(function(b, i) {
+    var isImg = (b.type || '').indexOf('image') === 0;
+    var thumb = isImg
+      ? '<img src="' + b.data + '" style="width:34px;height:34px;object-fit:cover;border-radius:6px;flex-shrink:0">'
+      : '<span style="font-size:22px;flex-shrink:0">📄</span>';
+    return '<div class="tb-bijlage">' +
+      '<div onclick="tbOpenBijlage(' + i + ')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;min-width:0">' +
+        thumb +
+        '<div style="min-width:0">' +
+          '<b style="display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(b.name) + '</b>' +
+          '<span style="font-size:11px;color:var(--muted)">' + tbFmtSize(b.size) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<span onclick="tbRemoveBijlage(' + i + ')" style="cursor:pointer;color:var(--nok);padding:6px 10px;font-size:18px;flex-shrink:0">×</span>' +
+    '</div>';
+  }).join('');
+}
+
+function tbAddBijlage(e) {
+  var files = Array.prototype.slice.call(e.target.files || []);
+  var found = tbFindTask(tbCurrentTaskId); if (!found) return;
+  if (!found.task.bijlagen) found.task.bijlagen = [];
+  files.forEach(function(f) {
+    if (f.size > 2 * 1024 * 1024) { toast('⚠️ "' + f.name + '" is te groot (max 2 MB)'); return; }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      found.task.bijlagen.push({ name: f.name, type: f.type, size: f.size, data: ev.target.result });
+      try { tbSave(); } catch (err) { toast('⚠️ Opslag vol — bijlage niet bewaard'); found.task.bijlagen.pop(); }
+      tbRenderBijlagen(found.task.bijlagen);
+    };
+    reader.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function tbRemoveBijlage(idx) {
+  var found = tbFindTask(tbCurrentTaskId); if (!found) return;
+  found.task.bijlagen.splice(idx, 1);
+  tbSave();
+  tbRenderBijlagen(found.task.bijlagen);
+}
+
+function tbOpenBijlage(idx) {
+  var found = tbFindTask(tbCurrentTaskId); if (!found) return;
+  var b = found.task.bijlagen[idx]; if (!b) return;
+  var w = window.open('', '_blank');
+  if (w) {
+    w.document.title = b.name;
+    w.document.body.style.margin = '0';
+    w.document.body.innerHTML = '<iframe src="' + b.data + '" style="border:0;width:100vw;height:100vh"></iframe>';
+  } else {
+    toast('Sta pop-ups toe om de bijlage te openen');
+  }
 }
 
 function tbSaveDetail() {

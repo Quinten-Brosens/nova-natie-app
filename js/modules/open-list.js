@@ -25,7 +25,7 @@ function renderOpenList() {
     r.onclick = function () { openItem(m.id); };
     r.innerHTML = '<div class="dot" style="background:' + col + '"></div>' +
       '<div style="font-size:20px">' + (m.icon || '⚠️') + '</div>' +
-      '<div class="tx"><b>' + m.titel + '</b><span>' + m.urgentie + ' · ' + relTime(m.datum) + '</span></div>' +
+      '<div class="tx"><b>' + escapeHtml(m.titel) + '</b><span>' + escapeHtml(m.urgentie) + ' · ' + relTime(m.datum) + '</span></div>' +
       '<div class="arrow" style="color:var(--muted);font-size:20px">›</div>';
     c.appendChild(r);
   });
@@ -38,7 +38,7 @@ function openItem(id) {
   document.getElementById('item-title').textContent = m.type || 'Melding';
   var info = document.getElementById('item-info');
   info.innerHTML =
-    '<div style="font-size:15px;color:var(--ink);font-weight:700;margin-bottom:8px">' + m.titel + '</div>' +
+    '<div style="font-size:15px;color:var(--ink);font-weight:700;margin-bottom:8px">' + escapeHtml(m.titel) + '</div>' +
     row('Locatie', m.locatie) +
     row('Categorie', m.categorie) +
     row('Urgentie', m.urgentie) +
@@ -64,7 +64,7 @@ function openItem(id) {
 }
 
 function row(label, val) {
-  return '<div style="margin:7px 0"><span style="color:var(--muted)">' + label + ':</span> <b style="color:var(--ink);font-weight:600">' + (val || '—') + '</b></div>';
+  return '<div style="margin:7px 0"><span style="color:var(--muted)">' + label + ':</span> <b style="color:var(--ink);font-weight:600">' + escapeHtml(val || '—') + '</b></div>';
 }
 
 function doCloseItem() {
@@ -88,7 +88,7 @@ function renderMine() {
     var r = document.createElement('div'); r.className = 'list-row'; r.style.cursor = 'pointer';
     r.onclick = function () { openItem(m.id); };
     r.innerHTML = '<div style="font-size:20px">' + (m.icon || '⚠️') + '</div>' +
-      '<div class="tx"><b>' + m.titel + '</b><span>' + relTime(m.datum) + '</span></div>' +
+      '<div class="tx"><b>' + escapeHtml(m.titel) + '</b><span>' + relTime(m.datum) + '</span></div>' +
       '<span class="st" style="background:' + col + '22;color:' + col + '">' + st + '</span>';
     c.appendChild(r);
   });

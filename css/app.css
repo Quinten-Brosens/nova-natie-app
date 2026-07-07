@@ -172,3 +172,6 @@ body{background:linear-gradient(135deg,#284532,#33543f);min-height:100vh;display
 .tb-done{opacity:.55;}
 .tb-badge{background:rgba(201,131,58,.18);color:var(--accent2);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;}
 .tb-person{background:rgba(40,69,50,.1);color:var(--navy);border-radius:5px;padding:2px 7px;font-size:11px;}
+.tb-dropzone{margin-top:8px;border:2px dashed var(--green-mid);border-radius:12px;padding:16px;text-align:center;color:var(--navy);font-weight:600;font-size:13px;cursor:pointer;background:#f3f7f4;}
+.tb-dropzone span{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:3px;}
+.tb-bijlage{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 6px 8px 10px;margin-bottom:6px;}

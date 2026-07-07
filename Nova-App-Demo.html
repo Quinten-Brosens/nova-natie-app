@@ -271,6 +271,12 @@
           <input id="tb-person-inp" type="text" placeholder="Naam toevoegen…" style="flex:1;margin:0">
           <button onclick="tbAddPerson()" style="background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+</button>
         </div>
+        <label style="margin-top:20px">Bijlagen</label>
+        <div id="tb-bijlagen"></div>
+        <input type="file" id="tb-file-in" multiple style="display:none" onchange="tbAddBijlage(event)">
+        <div class="tb-dropzone" onclick="document.getElementById('tb-file-in').click()">
+          📎 Bestand toevoegen<span>Foto of document · max 2 MB</span>
+        </div>
         <label style="margin-top:20px">Verplaatsen naar</label>
         <div id="tb-move-row" class="chips"></div>
       </div>
