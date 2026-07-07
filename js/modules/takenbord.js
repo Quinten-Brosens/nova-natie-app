@@ -1,10 +1,10 @@
 /* Nova Natie App — Module: Takenbord
-   Deelt localStorage met het zelfstandige takenbord (nova_tasks_v4 / nova_tasks_version).
-   Taken die in de app worden toegevoegd/gewijzigd zijn meteen zichtbaar in het takenbord en vice versa. */
+   Opslag is PER GEBRUIKER (nova_tasks_<email>) — elke gebruiker ziet enkel z'n eigen taken.
+   De begindata (TB_INIT) hoort bij Quinten en wordt alleen voor hem geladen; andere
+   gebruikers starten met een leeg bord. */
 
-var TB_VERSION = 5;
-var TB_KEY = 'nova_tasks_v4';
-var TB_VER_KEY = 'nova_tasks_version';
+var TB_OWNER = 'quinten.brosens@nova.be';   // eigenaar van de begindata
+var TB_LEGACY_KEY = 'nova_tasks_v4';         // oude gedeelde sleutel (eenmalige migratie voor eigenaar)
 
 var TB_SECTIONS = ['Active', 'Waiting On', 'Someday', 'Done'];
 var TB_LABELS = { 'Active': 'Actief', 'Waiting On': 'Wacht', 'Someday': 'Ooit', 'Done': 'Klaar' };
@@ -37,35 +37,50 @@ var TB_INIT = {
 };
 
 var tbData = null;
+var tbLoadedFor = null;      // e-mail waarvoor tbData geladen is
 var tbCurrentSection = 'Active';
 var tbCurrentTaskId = null;
 var tbNextId = 100;
 
-/* ---- Laden & opslaan ---- */
+/* ---- Laden & opslaan (per gebruiker) ---- */
+function tbKey() {
+  return 'nova_tasks_' + (currentUser ? currentUser.email : 'anon');
+}
+
+function tbEmptyBoard() {
+  return { sections: TB_SECTIONS, tasks: { 'Active': [], 'Waiting On': [], 'Someday': [], 'Done': [] } };
+}
+
 function tbLoad() {
-  var sv = parseInt(localStorage.getItem(TB_VER_KEY) || '0');
   var stored = null;
-  try { var s = localStorage.getItem(TB_KEY); if (s) stored = JSON.parse(s); } catch (e) {}
-  if (!stored) {
-    tbData = JSON.parse(JSON.stringify(TB_INIT));
-    localStorage.setItem(TB_VER_KEY, TB_VERSION);
-  } else if (sv >= TB_VERSION) {
+  try { var s = localStorage.getItem(tbKey()); if (s) stored = JSON.parse(s); } catch (e) {}
+
+  if (stored) {
     tbData = stored;
+  } else if (currentUser && currentUser.email === TB_OWNER) {
+    // Eigenaar: eenmalige migratie van het oude gedeelde bord, anders de begindata
+    var legacy = null;
+    try { var l = localStorage.getItem(TB_LEGACY_KEY); if (l) legacy = JSON.parse(l); } catch (e) {}
+    tbData = legacy || JSON.parse(JSON.stringify(TB_INIT));
   } else {
-    var allIds = new Set(TB_SECTIONS.flatMap(function(sec) { return (stored.tasks[sec] || []).map(function(t) { return t.id; }); }));
-    TB_SECTIONS.forEach(function(sec) {
-      if (!stored.tasks[sec]) stored.tasks[sec] = [];
-      (TB_INIT.tasks[sec] || []).forEach(function(t) { if (!allIds.has(t.id)) stored.tasks[sec].push(t); });
-    });
-    localStorage.setItem(TB_VER_KEY, TB_VERSION);
-    tbData = stored;
+    // Andere gebruikers starten met een leeg bord
+    tbData = tbEmptyBoard();
   }
-  tbNextId = Math.max.apply(null, [99].concat(TB_SECTIONS.flatMap(function(sec) { return (tbData.tasks[sec] || []).map(function(t) { return t.id; }); }))) + 1;
+
+  TB_SECTIONS.forEach(function(sec) { if (!tbData.tasks[sec]) tbData.tasks[sec] = []; });
+  tbNextId = Math.max.apply(null, [99].concat(TB_SECTIONS.flatMap(function(sec) { return tbData.tasks[sec].map(function(t) { return t.id; }); }))) + 1;
   tbSave();
 }
 
+function tbEnsureLoaded() {
+  var email = currentUser ? currentUser.email : null;
+  if (tbData && tbLoadedFor === email) return;
+  tbLoad();
+  tbLoadedFor = email;
+}
+
 function tbSave() {
-  try { localStorage.setItem(TB_KEY, JSON.stringify(tbData)); } catch (e) { toast('⚠️ Opslag vol'); }
+  try { localStorage.setItem(tbKey(), JSON.stringify(tbData)); } catch (e) { toast('⚠️ Opslag vol'); }
 }
 
 function tbFindTask(id) {
@@ -79,14 +94,15 @@ function tbFindTask(id) {
 
 /* ---- Navigatie ---- */
 function openTakenbord() {
-  if (!tbData) tbLoad();
+  tbEnsureLoaded();
   tbCurrentSection = 'Active';
   tbRender();
   go('s-taken');
 }
 
 function tbUpdateHomeBadge() {
-  if (!tbData) return;
+  if (!currentUser) return;
+  tbEnsureLoaded();
   var act = (tbData.tasks['Active'] || []).filter(function(t) { return !t.done; }).length;
   var b = document.getElementById('tb-home-badge');
   if (b) {
@@ -357,7 +373,7 @@ function tbConfirmAdd() {
 /* ---- Hook in go() override ---- */
 var _tbGo = go;
 go = function(id) {
-  if ((id === 's-dept' || id === 's-home') && tbData) tbUpdateHomeBadge();
+  if ((id === 's-dept' || id === 's-home') && currentUser) tbUpdateHomeBadge();
   if (id === 's-taken' && tbData) tbRender();
   _tbGo(id);
 };
