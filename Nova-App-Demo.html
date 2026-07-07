@@ -52,6 +52,10 @@
         <div class="dept soon" onclick="soon('Facility')"><span class="soon-tag">BINNENKORT</span><div class="ic">🧰</div><div class="nm">Facility</div></div>
         <div class="dept soon" onclick="soon('HR')"><span class="soon-tag">BINNENKORT</span><div class="ic">👥</div><div class="nm">HR</div></div>
       </div>
+      <div class="section-t">Persoonlijk</div>
+      <div class="tile" onclick="openTakenbord()">
+        <div class="ic">📋</div><div class="tx"><b>Takenbord</b><span>Taken opvolgen & beheren</span></div><span class="badge" id="tb-home-badge" style="display:none">0</span><div class="arrow">›</div>
+      </div>
     </div>
   </section>
 
@@ -76,9 +80,6 @@
       </div>
       <div class="tile" onclick="go('s-insp-list')">
         <div class="ic">✅</div><div class="tx"><b>Inspectie / checklist</b><span>Rondgang, PBM, ISPS, heftruck …</span></div><div class="arrow">›</div>
-      </div>
-      <div class="tile" onclick="openTakenbord()">
-        <div class="ic">📋</div><div class="tx"><b>Takenbord</b><span>Taken opvolgen & beheren</span></div><span class="badge" id="tb-home-badge" style="display:none">0</span><div class="arrow">›</div>
       </div>
       <div class="section-t">Overige (binnenkort)</div>
       <div class="tile disabled" onclick="soon('Incident registreren')"><div class="ic">🚑</div><div class="tx"><b>Ongeval / incident</b><span>Registratie & onderzoek</span></div><div class="arrow">›</div></div>
@@ -238,7 +239,7 @@
   ═══════════════════════════════════════════════ -->
   <section class="screen" id="s-taken">
     <div class="topbar">
-      <span class="back" onclick="go('s-home')">‹</span>
+      <span class="back" onclick="go('s-dept')">‹</span>
       <h1>Takenbord</h1>
       <span class="pill" id="tb-topbar-count">0 actief</span>
     </div>

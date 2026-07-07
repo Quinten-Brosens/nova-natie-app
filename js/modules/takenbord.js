@@ -267,7 +267,7 @@ function tbConfirmAdd() {
 /* ---- Hook in go() override ---- */
 var _tbGo = go;
 go = function(id) {
-  if (id === 's-home' && tbData) tbUpdateHomeBadge();
+  if ((id === 's-dept' || id === 's-home') && tbData) tbUpdateHomeBadge();
   if (id === 's-taken' && tbData) tbRender();
   _tbGo(id);
 };
